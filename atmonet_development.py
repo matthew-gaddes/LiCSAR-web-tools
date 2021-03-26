@@ -304,43 +304,6 @@ def check_exist_wrapper(args):
     
 
 
-#%% Set default
-frameID = '074A_05055_131313'                                                                   # Central Spain
-frameID = '014A_04939_131313'                                                                   # North Anatolian Fault
-startdate = 20141001
-enddate = int(dt.date.today().strftime("%Y%m%d"))
-get_gacos = True
-n_para = 4
-
-# it expects you to run the file in te frames dir.  I ahven't done that so it's all a mess.  
-
-#%% Determine frameID
-# wd = os.getcwd()
-# #wd = f"./{frameID}/"
-# if not os.path.exists(wd): os.mkdir(wd)
-
-trackID = str(int(frameID[0:3]))
-
-
-#%% Directory and file setting
-
-
-LiCSARweb = 'http://gws-access.ceda.ac.uk/public/nceo_geohazards/LiCSAR_products/'
-
-
-directories_dict = {'frame'    : Path(f"./{frameID}")}                                              # this is the same struture as the COMET LiCS portal.  
-directories_dict = {'ifgs'     : directories_dict['frame'] / 'interferograms',
-                    'epochs'   : directories_dict['frame'] / 'epochs',
-                    'metadata' : directories_dict['frame'] / 'metadata'}
-                    
-for directory in directories_dict.values():
-    if not os.path.exists(directory): os.makedirs(directory)                                            # note use of makedirs to required intermediate directoryies can be made if needed.  
-
-
-
-
-#%% Download the ENU and hgt files
-
 def download_metadata_files(trackID, frameId, outdir, LiCSARweb = 'http://gws-access.ceda.ac.uk/public/nceo_geohazards/LiCSAR_products/'):
     """The LiCSAR portal contains a folder of metadata, including products such as the DEM, or a figure showing the baselines.  
     This function downloads them.  
@@ -397,226 +360,178 @@ def download_metadata_files(trackID, frameId, outdir, LiCSARweb = 'http://gws-ac
     url = os.path.join(LiCSARweb, trackID, frameID, 'metadata', 'network.png')                             # construct the URL for the metadata file
     download_data(url, outdir / 'network.png')                                                             # 
 
-download_metadata_files(trackID, frameID, directories_dict['metadata'])
-
-#import sys; sys.exit()
-
-#%% mli
-# mlitif = frameID+'.geo.mli.tif'
-# if os.path.exists(mlitif):
-#     print('{} already exist. Skip.'.format(mlitif), flush=True)
-# else:
-#     ### Get available dates
-#     print('Searching earliest epoch for mli...', flush=True)
-#     url = os.path.join(LiCSARweb, trackID, frameID, 'epochs')
-#     response = requests.get(url)
-    
-#     response.encoding = response.apparent_encoding #avoid garble
-#     html_doc = response.text
-#     soup = BeautifulSoup(html_doc, "html.parser")
-#     tags = soup.find_all(href=re.compile(r"\d{8}"))
-#     imdates_all = [tag.get("href")[0:8] for tag in tags]
-#     _imdates = np.int32(np.array(imdates_all))
-#     _imdates = (_imdates[(_imdates>=startdate)*(_imdates<=enddate)]).astype('str').tolist()
-    
-#     ## Find earliest date in which mli is available
-#     imd1 = []
-#     for i, imd in enumerate(_imdates):
-#         if np.mod(i, 10) == 0:
-#             print("\r  {0:3}/{1:3}".format(i, len(_imdates)), end='', flush=True)
-#         url_epoch = os.path.join(url, imd)
-#         response = requests.get(url_epoch)
-#         response.encoding = response.apparent_encoding #avoid garble
-#         html_doc = response.text
-#         soup = BeautifulSoup(html_doc, "html.parser")
-#         tag = soup.find(href=re.compile(r"\d{8}.geo.mli.tif"))
-#         if tag is not None:
-#             print('\n{} found as earliest.'.format(imd))
-#             imd1 = imd
-#             break
-
-#     ### Download
-#     if imd1:
-#         print('Donwnloading {}.geo.mli.tif as {}.geo.mli.tif...'.format(imd1, frameID), flush=True)
-#         url_mli = os.path.join(url, imd1, imd1+'.geo.mli.tif')
-#         tools_lib.download_data(url_mli, mlitif)
-#     else:
-#         print('\nNo mli available on {}'.format(url), file=sys.stderr, flush=True)
 
 
-#%% GACOS if specified
-os.chdir('..')
-if get_gacos:
-    gacosdir = os.path.join(wd, 'GACOS')                                                                        # name of directory for GACOS products
-    if not os.path.exists(gacosdir): os.mkdir(gacosdir)                                                         # if it doesn't exist, make it.  
 
-    ### Get available dates
-    print('\nDownload GACOS data', flush=True)
-    url = os.path.join(LiCSARweb, trackID, frameID, 'epochs')
+
+def get_folders_from_LiCSAR_portal(url, double_date = True):
+    """On the LiCSAR S1 hub, there are folders of links to each product (e.g. for each epoch the radar intensity, or for interferograms between dates)
+    This function returns a list of all these links/dates, and is designed to be used to creat paths to then download these.  
+    Inputs:
+        url | string | url of webpage with links on.  
+        double_date | boolean | True if date/link is in interferogram form (YYYYMMDD_YYYYMMDD), False if in date form (YYYYMMDD)
+    Returns:
+        imdates_all | list of strings | dates/links of interst.  
+    History:
+        2021_03_26 | MEG | Modified from a LiCSBAS script.  
+    """
     response = requests.get(url)                                                                                # get the webpage with all the epochs on
     response.encoding = response.apparent_encoding                                                              # avoid garble?
     html_doc = response.text                                                                                    # turns the text into a giant string.  
     soup = BeautifulSoup(html_doc, "html.parser")                                                               # break the string into something that looks more like normal html
     tags = soup.find_all(href=re.compile(r"\d{8}"))                                                             # get just the links (which are epochs) from the html
-    imdates_all = [tag.get("href")[0:8] for tag in tags]                                                        # get the epochs (as a list)
-    _imdates = np.int32(np.array(imdates_all))                                                                  # convert to numpy array
-    _imdates = (_imdates[(_imdates>=startdate)*(_imdates<=enddate)]).astype('str').tolist()                     # back to list?
-    print('  There are {} epochs from {} to {}'.format(len(_imdates),                                           # len(_imdates) is the number of epochs.  
-                                   startdate, enddate), flush=True)
+    if double_date:
+        character_end = 17                                                                                      # double date is of form YYYYMMDD_YYYYMMDD to need 17 characters.  
+    else:
+        character_end = 8                                                                                       # single date is of form YYYYMMDD so need 8 characters
+    imdates_all = [tag.get("href")[0:character_end] for tag in tags]                                            # get the epochs (as a list)
+    # _imdates = np.int32(np.array(imdates_all))                                                                # convert to numpy array
+    # _imdates = (_imdates[(_imdates>=startdate)*(_imdates<=enddate)]).astype('str').tolist()                   # back to list?
+    return imdates_all
 
-    ### Extract available dates
-    print('  Searching available epochs ({} parallel)...'.format(n_para), flush=True)
 
-    args = [(i, len(_imdates),                                                                                  # a list with an entry for each epoch.  
-             os.path.join(url, imd, '{}.sltd.geo.tif'.format(imd)),                                             # each item in the list is a tuple, with 4 entries.  
-             os.path.join(gacosdir, imd+'.sltd.geo.tif')                                                         # the first is?  The second is?  
-             ) for i, imd in enumerate(_imdates)]                                                               # the 3rd is the path to the sltd file from Gacod, and the 4th is the path so save that to.  
+
+
+def download_LiCSAR_files(remote_dir, local_dir, date_start, date_end, file_extension, double_date = True):
+    """ A function to download  any type of file that is either processed per epoch (e.g. Gacos files), or between epochs (e.g. unwrapped phase.  )
+    Modified from scripts contained in LiCSBAS.  
+    
+    Inputs:
+        remote_dir | string | the remote directory with the dates for each folder in.  e.g. http://gws-access.ceda.ac.uk/public/nceo_geohazards/LiCSAR_products/14/014A_04939_131313/interferograms'
+                              Note that this is handled as a string as it's not dependent on the users' OS (i.e. it's aways coming from a linux server)
+        local_dir | string (or Path) |  the local directory with the dates for each folder in'014A_04939_131313/interferograms'.  Caution if using strings for paths!
+        date_start | string | YYYYMMDD form
+        date_end | string | YYYYMMDD form
+        file_extension | string | e.g. 'geo.unw.tif'  No . at the start.  
+        double_date | boolean | set to True if working with interfeograms, but false if Epochs.  
+    Returns:
+        Local files.  
+    History:
+        2021_03_26 | MEG | Created from modified LiCSBAS scripts.  
+        
+    """
+    
+    date_start = int(date_start)                                                                        # convert from a string to an int
+    date_end = int(date_end)
+    
+    # 0: Get the dates required:
+    file_dates_all = get_folders_from_LiCSAR_portal(remote_dir, double_date = double_date)              # get all the dates available on the portal
+    file_dates = []                                                                                     # initate for the dates we want
+    for file_date in file_dates_all:
+        if double_date:
+            mimd = int(file_date[:8])
+            simd = int(file_date[-8:])
+            if mimd >= date_start and simd <= date_end:
+                file_dates.append(file_date)
+        else:
+            imd = int(file_date[:8])
+            if imd >= date_start and imd <= date_end:
+                file_dates.append(file_date)
+                
+    # 1:  Determine which files need to be downloaded
+    
+    n_files= len(file_dates)
+    args = [(i, n_files,
+             os.path.join(remote_dir, file_date, f"{file_date}.{file_extension}"),
+             os.path.join(local_dir, file_date, f"{file_date}.{file_extension}")
+             ) for i, file_date in enumerate(file_dates)]
 
     p = multi.Pool(n_para)
-    rc = p.map(check_gacos_wrapper, args)                                                                       # for all epochs, check if Gacos data needs to be downloaded (compare locate [if exists] and remote)
-    p.close()                                                                                                   # rc is as list of the same length as the number of epochs.  
+    rc = p.map(check_exist_wrapper, args)                                                               # compare local (if it exists) and remote.  
+    p.close()
 
-    n_im_existing = 0
-    n_im_unavailable = 0
-    imdates_dl = []
-    for i, rc1 in enumerate(rc):                                                                                 # for each epoch's rc value, determine if we will download or not
-        if rc1 == 0:                                                                                             # No need to download
-            n_im_existing = n_im_existing + 1
-        if rc1 == 3 or rc1 == 5:                                                                                 # Cannot download
-            n_im_unavailable = n_im_unavailable + 1
-        elif rc1 == 1 or rc1 == 2  or rc1 == 4:                                                                  # Need to download
-            imdates_dl.append(_imdates[i])                                                                       # append to a list of which dates to download
+    
 
-    n_im_dl = len(imdates_dl)
+    n_files_existing = 0
+    files_dl = []
+    for i, rc1 in enumerate(rc):                                                                    # rc is a list of the status for each file.  Loop through it.  
+        if rc1 == 0:                                                                                  ## No need to download
+            n_files_existing += 1
+        if rc1 == 3 or rc1 == 5:                                                                     ## Can not download
+            print(f' {file_dates[i]}.{file_extension} not available.', flush=True)
+        elif rc1 == 1 or rc1 == 2  or rc1 == 4:                                                      ## Need download
+            files_dl.append(file_dates[i])                                                              # if it does need downloading, append to list
 
-    if n_im_existing > 0:
-        print('  {} GACOS data already downloaded'.format(n_im_existing), flush=True)
-    if n_im_unavailable > 0:
-        print('  {} GACOS data unavailable'.format(n_im_unavailable), flush=True)
+    #import pdb; pdb.set_trace()   
 
-    ### Download
-    if n_im_dl > 0:
-        print('{} GACOS data will be downloaded'.format(n_im_dl), flush=True)
-        print('Download GACOS ({} parallel)...'.format(n_para), flush=True)
-        ### Download
-        args = [(i, imd, n_im_dl,
-                 os.path.join(url, imd, '{}.sltd.geo.tif'.format(imd)),
-                 os.path.join(gacosdir, '{}.sltd.geo.tif'.format(imd))
-                 ) for i, imd in enumerate(imdates_dl)]
+    n_files_dl = len(files_dl)                                                                          # total number of files that will need to be downloaded
+    print(f'{n_files_existing} {file_extension} files already downloaded', flush=True)
+    print(f'{n_files_dl} {file_extension} files will be downloaded', flush=True)
+    
+
+    # 2: Do the downloading:
+    if n_files_dl != 0:
+        print('Downloading files ({} parallel)...'.format(n_para), flush=True)
+        args = [(i, ifgd, n_files_dl,
+                 os.path.join(remote_dir, file_dl, f"{file_dl}.{file_extension}"),
+                 os.path.join(local_dir, file_dl, f"{file_dl}.{file_extension}")
+                 ) for i, file_dl in enumerate(files_dl)]
         
         p = multi.Pool(n_para)
         p.map(download_wrapper, args)
         p.close()
-    else:
-        print('No GACOS data available from {} to {}'.format(startdate, enddate), flush=True)
+        
+    
+
+#%% Set default
+frameID = '074A_05055_131313'                                                                   # Central Spain
+frameID = '014A_04939_131313'                                                                   # North Anatolian Fault
+startdate = 20141001
+enddate = int(dt.date.today().strftime("%Y%m%d"))
+get_gacos = True
+n_para = 4
+
+# it expects you to run the file in te frames dir.  I ahven't done that so it's all a mess.  
+
+#%% Determine frameID
+# wd = os.getcwd()
+# #wd = f"./{frameID}/"
+# if not os.path.exists(wd): os.mkdir(wd)
+
+trackID = str(int(frameID[0:3]))
+
+
+#%% Directory and file setting
+
+
+LiCSARweb = 'http://gws-access.ceda.ac.uk/public/nceo_geohazards/LiCSAR_products/'
+
+
+directories_dict = {'frame'           : Path(f"./{frameID}")}                                              # this is the same struture as the COMET LiCS portal.  
+directories_dict = {'interferograms'  : directories_dict['frame'] / 'interferograms',
+                    'epochs'          : directories_dict['frame'] / 'epochs',
+                    'metadata'        : directories_dict['frame'] / 'metadata'}
+                    
+for directory in directories_dict.values():
+    if not os.path.exists(directory): os.makedirs(directory)                                            # note use of makedirs to required intermediate directoryies can be made if needed.  
+
+
+
+
+#%% Download the ENU and hgt files
+
+download_metadata_files(trackID, frameID, directories_dict['metadata'])
+
+#%% Download te Gacos file and the intererograms.  
+
+url_ifgdir = os.path.join(LiCSARweb, trackID, frameID, 'interferograms')
+download_LiCSAR_files(url_ifgdir, directories_dict['interferograms'], '20190101', '20190301', 'geo.unw.png')
+
+url_epochdir = os.path.join(LiCSARweb, trackID, frameID, 'epochs')
+download_LiCSAR_files(url_epochdir, directories_dict['epochs'], '20190101', '20200301', 'ztd.jpg', double_date=False)
+
+import sys; sys.exit()
+
+#%% mli
+
+
+
+
+#%%
+
 
 
 #%% unw and cc
 ### Get available dates
-print('\nDownload geotiff of unw and cc', flush=True)
-url_ifgdir = os.path.join(LiCSARweb, trackID, frameID, 'interferograms')
-response = requests.get(url_ifgdir)
 
-response.encoding = response.apparent_encoding #avoid garble
-html_doc = response.text
-soup = BeautifulSoup(html_doc, "html.parser")
-tags = soup.find_all(href=re.compile(r"\d{8}_\d{8}"))
-ifgdates_all = [tag.get("href")[0:17] for tag in tags]
-
-### Extract during start_date to end_date
-ifgdates = []
-for ifgd in ifgdates_all:
-    mimd = int(ifgd[:8])
-    simd = int(ifgd[-8:])
-    if mimd >= startdate and simd <= enddate:
-        ifgdates.append(ifgd)
-
-n_ifg = len(ifgdates)
-imdates = ifgdates2imdates(ifgdates)
-print('{} IFGs available from {} to {}'.format(n_ifg, imdates[0], imdates[-1]), flush=True)
-
-### Check if both unw and cc already donwloaded, new, and same size
-print('Checking existing unw and cc ({} parallel, may take time)...'.format(n_para), flush=True)
-
-## unw
-args = [(i, n_ifg,
-         os.path.join(url_ifgdir, ifgd, '{}.geo.unw.tif'.format(ifgd)),
-         os.path.join(ifgd, '{}.geo.unw.tif'.format(ifgd))
-         ) for i, ifgd in enumerate(ifgdates)]
-
-p = multi.Pool(n_para)
-rc = p.map(check_exist_wrapper, args)
-p.close()
-
-n_unw_existing = 0
-unwdates_dl = []
-for i, rc1 in enumerate(rc):
-    if rc1 == 0:  ## No need to download
-        n_unw_existing = n_unw_existing + 1
-    if rc1 == 3 or rc1 == 5:  ## Can not download
-        print('  {}.geo.unw.tif not available.'.format(ifgdates[i]), flush=True)
-    elif rc1 == 1 or rc1 == 2  or rc1 == 4:  ## Need download
-        unwdates_dl.append(ifgdates[i])
-
-## cc
-args = [(i, n_ifg,
-         os.path.join(url_ifgdir, ifgd, '{}.geo.cc.tif'.format(ifgd)),
-         os.path.join(ifgd, '{}.geo.cc.tif'.format(ifgd))
-         ) for i, ifgd in enumerate(ifgdates)]
-
-p = multi.Pool(n_para)
-rc = p.map(check_exist_wrapper, args)
-p.close()
-
-n_cc_existing = 0
-ccdates_dl = []
-for i, rc1 in enumerate(rc):
-    if rc1 == 0:  ## No need to download
-        n_cc_existing = n_cc_existing + 1
-    if rc1 == 3 or rc1 == 5:  ## Can not download
-        print('  {}.geo.cc.tif not available.'.format(ifgdates[i]), flush=True)
-    elif rc1 == 1 or rc1 == 2  or rc1 == 4:  ## Need download
-        ccdates_dl.append(ifgdates[i])
-
-n_unw_dl = len(unwdates_dl)
-n_cc_dl = len(ccdates_dl)
-print('{} unw already downloaded'.format(n_unw_existing), flush=True)
-print('{} unw will be downloaded'.format(n_unw_dl), flush=True)
-print('{} cc already downloaded'.format(n_cc_existing), flush=True)
-print('{} cc will be downloaded'.format(n_cc_dl), flush=True)
-
-### Download unw with parallel
-if n_unw_dl != 0:
-    print('Download unw ({} parallel)...'.format(n_para), flush=True)
-    args = [(i, ifgd, n_unw_dl,
-             os.path.join(url_ifgdir, ifgd, '{}.geo.unw.tif'.format(ifgd)),
-             os.path.join(ifgd, '{}.geo.unw.tif'.format(ifgd))
-             ) for i, ifgd in enumerate(unwdates_dl)]
-    
-    p = multi.Pool(n_para)
-    p.map(download_wrapper, args)
-    p.close()
-   
-### Download cc with parallel
-if n_cc_dl != 0:
-    print('Download cc ({} parallel)...'.format(n_para), flush=True)
-    args = [(i, ifgd, n_cc_dl,
-             os.path.join(url_ifgdir, ifgd, '{}.geo.cc.tif'.format(ifgd)),
-             os.path.join(ifgd, '{}.geo.cc.tif'.format(ifgd))
-             ) for i, ifgd in enumerate(ccdates_dl)]
-    
-    p = multi.Pool(n_para)
-    p.map(download_wrapper, args)
-    p.close()
-   
-
-#%% Finish
-# elapsed_time = time.time()-start
-# hour = int(elapsed_time/3600)
-# minite = int(np.mod((elapsed_time/60),60))
-# sec = int(np.mod(elapsed_time,60))
-# print("\nElapsed time: {0:02}h {1:02}m {2:02}s".format(hour,minite,sec))
-
-# print('\n{} Successfully finished!!\n'.format(os.path.basename(argv[0])))
-# print('Output directory: {}\n'.format(outdir))
 
