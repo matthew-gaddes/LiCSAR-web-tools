@@ -1,6 +1,6 @@
 # LiCSAR Web Tools
 
-A small collection of Python3 scripts to download data from the COMET-LiCS Sentinel-1 InSAR portal.  The licsar_web_tools_example.py shows two examples, but usage can be summaried below:
+A small collection of Python3 scripts to download data from the COMET-LiCS Sentinel-1 InSAR portal.  The licsar_web_tools_example.py shows two examples, but usage can be summarised below:
 
 <pre><code>
 frameID = '014A_04939_131313'                                       # As defined on the LiCSAR portal
@@ -25,10 +25,10 @@ The files available to be downloaded can be browsed:
 ![Screenshot from 2021-03-29 16-11-55](https://user-images.githubusercontent.com/10498635/112858322-a9f1c900-90a9-11eb-8a6b-52a27bf9fe25.png)
 
 
-There is also a conda .yml file included for buliding a suitable environment:
+There is also a conda .yml file included for building a suitable environment:
 
 <pre><code>
-conda env create --file LiCSAR_web_tools.py
+conda env create --file LiCSAR_web_tools.yml
 </code></pre>
 
 This has only been tested on Linux (Ubuntu 18.04), so please get in touch if you encounter any bugs.  Several of the functions and ideas used in this software were  were taken from LiCSBAS: <https://github.com/yumorishita/LiCSBAS>
