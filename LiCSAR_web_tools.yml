@@ -1,0 +1,16 @@
+name: licsar_web_tools
+channels:
+  - defaults
+  - conda-forge
+
+dependencies:
+  - python=3.7                                  # general
+  - matplotlib=3
+  - numpy
+  - spyder                                      #
+  - scipy
+  - beautifulsoup4                              # For LiCSBAS tools and parsing URL
+  - statsmodels                                 # For LiCSBAS tools
+  - pip
+  - pip:
+    - wget
