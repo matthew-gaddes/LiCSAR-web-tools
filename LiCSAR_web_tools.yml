@@ -11,6 +11,7 @@ dependencies:
   - scipy
   - beautifulsoup4                              # For LiCSBAS tools and parsing URL
   - statsmodels                                 # For LiCSBAS tools
+  - gdal                                        # to convert tifs to numpy arrays  
   - pip
   - pip:
     - wget
