@@ -79,14 +79,14 @@ def download_LiCSAR_portal_data(frameID, date_start, date_end, download_metadata
     if epoch_files is not None:
         url_epochdir = os.path.join(LiCSARweb, trackID, frameID, 'epochs')
         for epoch_file in epoch_files:
-            download_LiCSAR_files(url_epochdir, directories_dict['epochs'], date_start, date_end, epoch_file, double_date=False)
+            download_LiCSAR_files(url_epochdir, directories_dict['epochs'], date_start, date_end, epoch_file, double_date=False, n_para=n_para)
     
     
     # 3: Possibly download files that are processed between epochs (e.g. interferograms)
     if between_epoch_files is not None:
         url_ifgdir = os.path.join(LiCSARweb, trackID, frameID, 'interferograms')
         for between_epoch_file in between_epoch_files:
-            download_LiCSAR_files(url_ifgdir, directories_dict['interferograms'], date_start, date_end, between_epoch_file)
+            download_LiCSAR_files(url_ifgdir, directories_dict['interferograms'], date_start, date_end, between_epoch_file, n_para=n_para)
     
 
 
@@ -150,7 +150,7 @@ def download_LiCSAR_files(remote_dir, local_dir, date_start, date_end, file_exte
     for i, rc1 in enumerate(rc):                                                                    # rc is a list of the status for each file.  Loop through it.  
         if rc1 == 0:                                                                                  ## No need to download
             n_files_existing += 1
-        if rc1 == 3 or rc1 == 5:                                                                     ## Can not download
+        if rc1 == 3:                                                                                 ## Can not download
             print(f' {file_dates[i]}.{file_extension} not available.', flush=True)
         elif rc1 == 1 or rc1 == 2  or rc1 == 4:                                                      ## Need download
             files_dl.append(file_dates[i])                                                              # if it does need downloading, append to list
