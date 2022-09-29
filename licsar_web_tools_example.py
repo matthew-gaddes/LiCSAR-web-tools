@@ -19,7 +19,7 @@ frameID = '014A_04939_131313'                                       # As defined
 date_start = 20190901                                               # YYYYMMDD
 date_end   = 20200101                                               # YYYYMMDD
 download_metadata = True                                            # the network of baselines, DEM etc.  
-between_epoch_files = ['geo.unw.png', 'geo.cc.png']                 # Possible files: 'geo.cc.png', 'geo.cc.tif', 'geo.diff.png', 'geo.diff_pha.tif', 'geo_diff_unfiltered.png', 'geo_diff_unfiltered_pha.tif', 'geo.unw.png', 'geo.unw.tif'
+between_epoch_files = ['geo.unw.png', 'geo.cc.png']                 # Possible files: 'geo.cc.png', 'geo.cc.tif', 'geo.diff.png', 'geo.diff_pha.tif', 'geo.diff_unfiltered.png', 'geo.diff_unfiltered_pha.tif', 'geo.unw.png', 'geo.unw.tif'
 epoch_files = ['geo.mli.png','ztd.jpg']                             # Possible files: 'geo.mli.png', 'geo.mli.tif', 'sltd.geo.tif', 'ztd.geo.tif', 'ztd.jpg'
 n_para = 4                                                          # Parallelisation.  The number of cores is a good starting point.    
 
@@ -34,7 +34,7 @@ frameID = '128D_09016_110500'                         #  As defined on the LiCSA
 date_start = 20180301                                 # YYYYMMDD
 date_end   = 20180601                                 # YYYYMMDD
 download_metadata = False                             # the network of baselines, DEM etc.  
-between_epoch_files = ['geo.unw.png']                 # Possible files: 'geo.cc.png', 'geo.cc.tif', 'geo.diff.png', 'geo.diff_pha.tif', 'geo_diff_unfiltered.png', 'geo_diff_unfiltered_pha.tif', 'geo.unw.png', 'geo.unw.tif'
+between_epoch_files = ['geo.unw.png']                 # Possible files: 'geo.cc.png', 'geo.cc.tif', 'geo.diff.png', 'geo.diff_pha.tif', 'geo.diff_unfiltered.png', 'geo.diff_unfiltered_pha.tif', 'geo.unw.png', 'geo.unw.tif'
 epoch_files = None                                    # Possible files: 'geo.mli.png', 'geo.mli.tif', 'sltd.geo.tif', 'ztd.geo.tif', 'ztd.jpg'
 n_para = 4                                            # Parallelisation.  The number of cores is a good starting point.    
 
@@ -50,7 +50,7 @@ frameID = '162A_06192_060402'                         #  As defined on the LiCSA
 date_start = 20190101                                 # YYYYMMDD
 date_end   = 20190201                                 # YYYYMMDD
 download_metadata = True                              # the network of baselines, DEM etc.  
-between_epoch_files = ['geo.unw.png', 'geo.unw.tif']  # Possible files: 'geo.cc.png', 'geo.cc.tif', 'geo.diff.png', 'geo.diff_pha.tif', 'geo_diff_unfiltered.png', 'geo_diff_unfiltered_pha.tif', 'geo.unw.png', 'geo.unw.tif'
+between_epoch_files = ['geo.unw.png', 'geo.unw.tif']  # Possible files: 'geo.cc.png', 'geo.cc.tif', 'geo.diff.png', 'geo.diff_pha.tif', 'geo.diff_unfiltered.png', 'geo.diff_unfiltered_pha.tif', 'geo.unw.png', 'geo.unw.tif'
 epoch_files = ['geo.mli.tif']                         # Possible files: 'geo.mli.png', 'geo.mli.tif', 'sltd.geo.tif', 'ztd.geo.tif', 'ztd.jpg'
 n_para = 4                                            # Parallelisation.  The number of cores is a good starting point.    
 
