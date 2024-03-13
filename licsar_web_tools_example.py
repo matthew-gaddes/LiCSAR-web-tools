@@ -6,6 +6,9 @@ Created on Wed Mar 24 12:41:47 2021
 @author: matthew
 """
 
+import sys
+import pdb
+
 #%% Imports
 
 from licsar_web_tools_downloading import download_LiCSAR_portal_data
@@ -26,6 +29,7 @@ n_para = 4                                                          # Parallelis
 
 download_LiCSAR_portal_data(frameID, date_start, date_end, download_metadata, epoch_files, between_epoch_files, n_para)
 
+sys.exit()
 
 #%% An example of Sierra Negra volcano (Galapagos Archipelago, Ecuador)
 
