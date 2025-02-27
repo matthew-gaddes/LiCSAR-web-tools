@@ -29,7 +29,8 @@ def download_LiCSAR_portal_data(frameID, date_start, date_end, download_metadata
     """
     
     
-    LiCSARweb = 'http://gws-access.ceda.ac.uk/public/nceo_geohazards/LiCSAR_products/'                                      # Shouldn't need to change
+    #LiCSARweb = 'http://gws-access.ceda.ac.uk/public/nceo_geohazards/LiCSAR_products/'                                      # Shouldn't need to change
+    LiCSARweb = 'https://gws-access.jasmin.ac.uk/public/nceo_geohazards/LiCSAR_products/'
     
     import os
     from pathlib import Path
@@ -73,20 +74,31 @@ def download_LiCSAR_portal_data(frameID, date_start, date_end, download_metadata
         
     # 1: Possibly download the metadata files
     if download_metadata:
-        download_LiCSAR_metadata_files(trackID, frameID, directories_dict['metadata'])
+        download_LiCSAR_metadata_files(
+            trackID, frameID, directories_dict['metadata']
+            )
         
     # 2: Possibly download files that are processed per epoch (e.g. Gacos)
     if epoch_files is not None:
-        url_epochdir = os.path.join(LiCSARweb, trackID, frameID, 'epochs')
+         # empty string at the end forces trailing / which ceda needs
+        url_epochdir = os.path.join(LiCSARweb, trackID, frameID, 'epochs', "")
         for epoch_file in epoch_files:
-            download_LiCSAR_files(url_epochdir, directories_dict['epochs'], date_start, date_end, epoch_file, double_date=False)
+            download_LiCSAR_files(
+                url_epochdir, directories_dict['epochs'], date_start, date_end,
+                epoch_file, double_date=False
+                )
     
     
     # 3: Possibly download files that are processed between epochs (e.g. interferograms)
     if between_epoch_files is not None:
-        url_ifgdir = os.path.join(LiCSARweb, trackID, frameID, 'interferograms')
+        url_ifgdir = os.path.join(
+            LiCSARweb, trackID, frameID, 'interferograms', ""
+            )
         for between_epoch_file in between_epoch_files:
-            download_LiCSAR_files(url_ifgdir, directories_dict['interferograms'], date_start, date_end, between_epoch_file)
+            download_LiCSAR_files(
+                url_ifgdir, directories_dict['interferograms'], date_start, 
+                date_end, between_epoch_file
+                )
     
 
 
@@ -260,6 +272,10 @@ def get_folders_from_LiCSAR_portal(url, double_date = True):
     import re
     
     response = requests.get(url)                                                                                # get the webpage with all the epochs on
+    
+    response = requests.get(f"{url}/")                                                                                # get the webpage with all the epochs on
+    
+
     response.encoding = response.apparent_encoding                                                              # avoid garble?
     html_doc = response.text                                                                                    # turns the text into a giant string.  
     soup = BeautifulSoup(html_doc, "html.parser")                                                               # break the string into something that looks more like normal html
