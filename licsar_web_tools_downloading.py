@@ -19,7 +19,7 @@ def download_LiCSAR_portal_data(frameID, date_start, date_end, download_metadata
         epoch_files          | None or list | List of strings with the extensions of the files that we wish to download.  There are per epoch (i.e things like radar intensity)  
                                               E.g. ['geo.mli.png', 'geo.mli.tif', 'sltd.geo.tif', 'ztd.geo.tif', 'ztd.jpg']
         between_epoch_files | None or list | List of strings with the extensions of the files that we wish to download.  There are between epochs (e.g. phase)   
-                                             ['geo.cc.png', 'geo.cc.tif', 'geo.diff.png', 'geo.diff_pha.tif', 'geo_diff_unfiltered.png', 'geo_diff_unfiltered_pha.tif', 'geo.unw.png', 'geo.unw.tif']:
+                                             ['geo.cc.png', 'geo.cc.tif', 'geo.diff.png', 'geo.diff_pha.tif', 'geo.diff_unfiltered.png', 'geo.diff_unfiltered_pha.tif', 'geo.unw.png', 'geo.unw.tif']:
          n_para             | int | Sets the parallelisation of downloads.  Number of CPU cores is a good starting point.  
      Returns:
          Local files.  
@@ -41,7 +41,7 @@ def download_LiCSAR_portal_data(frameID, date_start, date_end, download_metadata
     # -1: Check inputs for common mistakes (not exhaustive)
     if between_epoch_files is not None:
         for between_epoch_file in between_epoch_files:
-            if between_epoch_file not in ['geo.cc.png', 'geo.cc.tif', 'geo.diff.png', 'geo.diff_pha.tif', 'geo_diff_unfiltered.png', 'geo_diff_unfiltered_pha.tif', 'geo.unw.png', 'geo.unw.tif']:
+            if between_epoch_file not in ['geo.cc.png', 'geo.cc.tif', 'geo.diff.png', 'geo.diff_pha.tif', 'geo.diff_unfiltered.png', 'geo.diff_unfiltered_pha.tif', 'geo.unw.png', 'geo.unw.tif']:
                 print(f"'{between_epoch_file}' is not a LiCSAR file extension.  No attempt will be made to download it, but we'll continue anyway.  ")
                 if len(between_epoch_files) == 1:
                     between_epoch_files = None
